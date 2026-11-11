@@ -454,19 +454,14 @@ class reactor:
         script = FaceSwapScript()
         pil_images = batch_tensor_to_pil(input_image)
 
-        # NSFW checker
-        logger.status("Checking for any unsafe content...")
+        # NSFW checker — disabled in this fork (content_machine/workflows/face-swap-video):
+        # pass all frames through, no vit-base-nsfw-detector filtering
+        pil_images_sfw = list(pil_images)
         pbar = progress_bar(len(pil_images))
-        pil_images_sfw = []
         for img in pil_images:
             if state.interrupted or model_management.processing_interrupted():
                 logger.status("Interrupted by User")
                 break
-            img_byte_arr = io.BytesIO()
-            img.save(img_byte_arr, format='PNG')
-            img_byte_arr = img_byte_arr.getvalue()
-            if not sfw.nsfw_image(img_byte_arr, NSFWDET_MODEL_PATH):
-                pil_images_sfw.append(img)
             pbar.update(1)
         pil_images = pil_images_sfw
         # # #
